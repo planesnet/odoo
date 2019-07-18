@@ -167,7 +167,7 @@ var PivotView = View.extend({
     },
     prepare_fields: function (fields) {
         var self = this,
-            groupable_types = ['many2one', 'char', 'boolean', 
+            groupable_types = ['many2one', 'char', 'boolean',
                                'selection', 'date', 'datetime'];
         this.fields = fields;
         _.each(fields, function (field, name) {
@@ -206,7 +206,7 @@ var PivotView = View.extend({
         var _super = this._super.bind(this);
         this.do_push_state({});
         return this.data_loaded.done(function () {
-            self.display_table(); 
+            self.display_table();
             self.$buttons.find('.o_pivot_measures_list li').removeClass('selected');
             self.active_measures.forEach(function (measure) {
                 self.$buttons.find('li[data-field="' + measure + '"]').addClass('selected');
@@ -240,7 +240,7 @@ var PivotView = View.extend({
     on_open_header_click: function (event) {
         var id = $(event.target).data('id'),
             header = this.headers[id];
-        header.expanded = false;        
+        header.expanded = false;
         header.children = [];
         var new_groupby_length = this.get_header_depth(header.root) - 1;
         header.root.groupbys.splice(new_groupby_length);
@@ -263,13 +263,13 @@ var PivotView = View.extend({
                 left: position.left + event.offsetX,
             });
             $menu.show();
-            event.stopPropagation();            
+            event.stopPropagation();
         }
     },
     on_cell_click: function (event) {
         var $target = $(event.target);
-        if ($target.hasClass('o_pivot_header_cell_closed') 
-            || $target.hasClass('o_pivot_header_cell_opened') 
+        if ($target.hasClass('o_pivot_header_cell_closed')
+            || $target.hasClass('o_pivot_header_cell_opened')
             || $target.hasClass('o_empty')
             || !this.enable_linking) {
             return;
@@ -313,7 +313,7 @@ var PivotView = View.extend({
     },
     sort_rows: function (col_id, measure, descending) {
         var self = this;
-        traverse_tree(this.main_row.root, function (header) { 
+        traverse_tree(this.main_row.root, function (header) {
             header.children.sort(compare);
         });
         this.sorted_column = {
@@ -396,7 +396,7 @@ var PivotView = View.extend({
     load_data: function (update) {
         var should_update = (update && this.main_row.root && this.main_col.root);
         var self = this,
-            i, j, 
+            i, j,
             groupbys = [],
             row_gbs = this.main_row.groupbys,
             col_gbs = this.main_col.groupbys,
@@ -535,7 +535,7 @@ var PivotView = View.extend({
         } else {
             path = [total].concat(value.slice(i,j-1));
             parent = value.length ? find_path_in_tree(root, path) : null;
-        } 
+        }
         var header = {
             id: utils.generate_id(),
             expanded: false,
@@ -650,6 +650,10 @@ var PivotView = View.extend({
             return self.measures[name].type;
         });
         var widgets = this.widgets;
+        var measure_fields = this.active_measures.map(function (name) {
+            return self.measures[name];
+        });
+
         for (i = 0; i < rows.length; i++) {
             $row = $('<tr>');
             $header = $('<td>')
@@ -660,7 +664,11 @@ var PivotView = View.extend({
             if (rows[i].indent > 0) $header.attr('title', groupby_labels[rows[i].indent - 1]);
             $header.appendTo($row);
             for (j = 0; j < length; j++) {
-                value = formats.format_value(rows[i].values[j], {type: measure_types[j % nbr_measures], widget: widgets[j % nbr_measures]});
+                value = formats.format_value(rows[i].values[j], {type: measure_types[j % nbr_measures],
+                    widget: widgets[j % nbr_measures],
+                    field:  measure_fields[j % nbr_measures],
+                    digits: measure_fields[j % nbr_measures].digits
+                });
                 $cell = $('<td>')
                             .data('id', rows[i].id)
                             .data('col_id', rows[i].col_ids[Math.floor(j / nbr_measures)])
@@ -757,7 +765,7 @@ var PivotView = View.extend({
                 indent: header.path.length - 1,
                 title: header.path[header.path.length-1],
                 expanded: header.expanded,
-                values: values,              
+                values: values,
             });
             traverse_tree(self.main_col.root, add_cells, header.id, values, col_ids);
             if (self.main_col.width > 1) {
@@ -795,7 +803,7 @@ var PivotView = View.extend({
             this.active_measures = _.without(this.active_measures, field);
             this.display_table();
         } else {
-            this.active_measures.push(field);            
+            this.active_measures.push(field);
             this.load_data().then(this.display_table.bind(this));
         }
     },
@@ -838,7 +846,7 @@ var PivotView = View.extend({
             data: {data: JSON.stringify(table)},
             complete: framework.unblockUI,
             error: crash_manager.rpc_error.bind(crash_manager)
-        });    
+        });
     },
     destroy: function () {
         if (this.$buttons) {
